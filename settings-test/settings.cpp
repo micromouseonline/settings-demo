@@ -152,7 +152,9 @@ void print_setting(const int i, const int dp) {
     Serial.print('$');
     Serial.print(i);
 
-    Serial.print('=');
+    Serial.print(' ');
+    // Serial.print('=');
+    // Serial.print('=');
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i)) {
         case T_float:
