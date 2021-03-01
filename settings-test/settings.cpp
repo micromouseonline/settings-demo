@@ -154,10 +154,8 @@ void print_setting(const int i, const int dp) {
     }
     Serial.print('$');
     Serial.print(i);
-
-    Serial.print(' ');
-    // Serial.print('=');
-    // Serial.print('=');
+    // Serial.print(' ');
+    Serial.print('=');
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i)) {
         case T_float:
@@ -172,17 +170,20 @@ void print_setting(const int i, const int dp) {
         case T_uint32_t:
             Serial.print(*reinterpret_cast<uint32_t *>(ptr));
             break;
+        case T_uint16_t:
+            Serial.print(*reinterpret_cast<uint16_t *>(ptr));
+            break;
         case T_int:
             Serial.print(*reinterpret_cast<int *>(ptr));
             break;
         default:
             Serial.println(F(" unknown type"));
     }
-    char buffer[32];
     Serial.print(' ');
-    Serial.print('#');
-    strncpy_P(buffer, (char *)pgm_read_word(&(variableString[i])), 31); // Necessary casts and dereferencing,
-    Serial.print(buffer);
+    // char buffer[32];
+    // Serial.print('#');
+    // strncpy_P(buffer, (char *)pgm_read_word(&(variableString[i])), 31); // Necessary casts and dereferencing,
+    // Serial.print(buffer);
     Serial.println();
 }
 

@@ -60,7 +60,7 @@
  *
  * NOTE: this means that any custom values in EEPROM will be lost.
  */
-const int SETTINGS_REVISION = 1002;
+const int SETTINGS_REVISION = 1005;
 
 /***
  * The address of the copy stored in EEPROM must be fixed. Although the size of
@@ -80,6 +80,7 @@ const int SETTING_MAX_SIZE = 64;
 enum TypeName : uint8_t {
     T_char,
     T_bool,
+    T_uint16_t,
     T_uint32_t,
     T_float,
     T_int,
@@ -109,6 +110,7 @@ enum TypeName : uint8_t {
   ACTION(  uint32_t,    maxTime,     123456)     \
   ACTION(  int,         RunCount,    0)        \
   ACTION(  bool,        JapanRules,  true)       \
+  ACTION(  uint16_t,    flags,       0)         \
 \
 
 /***
@@ -172,7 +174,11 @@ int write_setting(const int i, const char *valueString);
  *
  * If the string converting version is never called, you will
  * save about 1k of flash. Unless you use atof() or atoi() elsewhere.
+ *
+ *
  */
+
+// TODO: when the converters are moved into this file, the strng version should use them
 template <class T>
 int write_setting(const int i, const T value) {
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
@@ -188,6 +194,9 @@ int write_setting(const int i, const T value) {
             break;
         case T_uint32_t:
             *reinterpret_cast<uint32_t *>(ptr) = value;
+            break;
+        case T_uint16_t:
+            *reinterpret_cast<uint16_t *>(ptr) = value;
             break;
         case T_int:
             *reinterpret_cast<int *>(ptr) = value;
