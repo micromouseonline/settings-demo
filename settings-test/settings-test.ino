@@ -5,6 +5,9 @@
 void setup() {
     Stopwatch sw;
     Serial.begin(115200);
+    Serial.print(F(" Settings Count "));
+    Serial.println(get_settings_count());
+    load_settings_from_eeprom(true);
     Serial.println();
     Serial.print(F("Settings object uses "));
     Serial.print(sizeof(Settings));
@@ -16,6 +19,7 @@ void setup() {
 
     write_setting(2, "900.654");
     write_setting(3, 98);
+    write_setting(7, false);
 
     settings.MaxAccel = 100;
     Serial.println(settings.RunCount);
