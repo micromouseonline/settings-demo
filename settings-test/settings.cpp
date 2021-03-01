@@ -149,6 +149,9 @@ void load_settings_from_eeprom(bool verbose) {
  * The variable is identified by its index, i.
  */
 void print_setting(const int i, const int dp) {
+    if (i >= get_settings_count()) {
+        return;
+    }
     Serial.print('$');
     Serial.print(i);
 
@@ -191,6 +194,9 @@ void print_setting(const int i, const int dp) {
  * (Though that is another approach)
  */
 int write_setting(const int i, const char *valueString) {
+    if (i >= get_settings_count()) {
+        return -1;
+    }
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i)) {
         case T_float:
