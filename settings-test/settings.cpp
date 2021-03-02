@@ -158,7 +158,7 @@ void print_setting(const int i, const int dp) {
             Serial.print(*reinterpret_cast<float *>(ptr), dp);
             break;
         case T_bool:
-            Serial.print((*reinterpret_cast<bool *>(ptr)) ? F("true") : F("false"));
+            Serial.print((*reinterpret_cast<bool *>(ptr)) ? 1 : 0);
             break;
         case T_char:
             Serial.print(*reinterpret_cast<char *>(ptr));
