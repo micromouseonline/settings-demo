@@ -164,15 +164,10 @@ int execute_settings_command(char *line) {
     uint8_t pos = 1; // the first character [0] is already known
     // get the parameter index
     int index;
-    Stopwatch sw;
     if (!read_integer(line, &pos, &index)) {
         // This could be the place to trigger a string search
         return T_UNEXPECTED_TOKEN;
     }
-    Serial.print('[');
-    Serial.print(sw.split());
-    Serial.print(']');
-    Serial.println();
     if (index < 0 or index >= get_settings_count()) {
         return T_OUT_OF_RANGE;
     }
@@ -185,14 +180,9 @@ int execute_settings_command(char *line) {
 
     // It was an assignment so get the value
     float value;
-    sw.start();
     if (!read_float(line, &pos, &value)) {
         return T_OUT_OF_RANGE;
     }
-    Serial.print('[');
-    Serial.print(sw.split());
-    Serial.print(']');
-    Serial.println();
     // Any remaining characters are ignored
 
     // Everything must have worked. Woot!
