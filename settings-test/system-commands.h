@@ -1,6 +1,4 @@
 /*
- * Stopwatch class - provides basic microsecond level timing.
- *
  * Created on Tue Mar 02 2021
  *
  * The MIT License (MIT)
@@ -21,40 +19,11 @@
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _STOPWATCH_H
-#define _STOPWATCH_H
+#ifndef SYSTEM_COMMANDS_H
+#define SYSTEM_COMMANDS_H
 
 #include <Arduino.h>
 
-const uint32_t ONE_MILLISECOND = 1000;
-const uint32_t ONE_SECOND = 1000 * ONE_MILLISECOND;
-class Stopwatch {
-
-public:
-    Stopwatch() {
-        start();
-    };
-
-    void start() {
-        start_time = micros();
-        stop_time = start_time;
-    };
-
-    void stop() {
-        stop_time = micros();
-    };
-
-    uint32_t split() {
-        return micros() - start_time;
-    }
-
-    uint32_t elapsed_time() const {
-        return stop_time - start_time;
-    };
-
-private:
-    uint32_t start_time;
-    uint32_t stop_time;
-};
+int execute_settings_command(char *line);
 
 #endif

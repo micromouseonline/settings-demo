@@ -1,26 +1,22 @@
 /***********************************************************************
  * Created by Peter Harrison on 2019-06-10.
- * Copyright (c) 2019 Peter Harrison
  *
+ * The MIT License (MIT)
+ * Copyright (c) 2021 Peter Harrison
  *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without l> imitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial
+ * portions of the Software.
  *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+ * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * Macros derived from
  * https://stackoverflow.com/questions/201593/is-there-a-simple-way-to-convert-c-enum-to-string/238157#238157
@@ -60,7 +56,7 @@
  *
  * NOTE: this means that any custom values in EEPROM will be lost.
  */
-const int SETTINGS_REVISION = 1002;
+const int SETTINGS_REVISION = 1005;
 
 /***
  * The address of the copy stored in EEPROM must be fixed. Although the size of
@@ -80,6 +76,7 @@ const int SETTING_MAX_SIZE = 64;
 enum TypeName : uint8_t {
     T_char,
     T_bool,
+    T_uint16_t,
     T_uint32_t,
     T_float,
     T_int,
@@ -109,6 +106,7 @@ enum TypeName : uint8_t {
   ACTION(  uint32_t,    maxTime,     123456)     \
   ACTION(  int,         RunCount,    0)        \
   ACTION(  bool,        JapanRules,  true)       \
+  ACTION(  uint16_t,    flags,       0)         \
 \
 
 /***
@@ -172,7 +170,11 @@ int write_setting(const int i, const char *valueString);
  *
  * If the string converting version is never called, you will
  * save about 1k of flash. Unless you use atof() or atoi() elsewhere.
+ *
+ *
  */
+
+// TODO: when the converters are moved into this file, the strng version should use them
 template <class T>
 int write_setting(const int i, const T value) {
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
@@ -188,6 +190,9 @@ int write_setting(const int i, const T value) {
             break;
         case T_uint32_t:
             *reinterpret_cast<uint32_t *>(ptr) = value;
+            break;
+        case T_uint16_t:
+            *reinterpret_cast<uint16_t *>(ptr) = value;
             break;
         case T_int:
             *reinterpret_cast<int *>(ptr) = value;
