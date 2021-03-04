@@ -1,28 +1,41 @@
-/***********************************************************************
- * Created by Peter Harrison on 2019-06-10.
- *
- * The MIT License (MIT)
- * Copyright (c) 2021 Peter Harrison
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or substantial
- * portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
- * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- **************************************************************************/
+/*
+ * File: settings.cpp                                                                    *
+ * Project: settings-test                                                                *
+ * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
+ * Author: Peter Harrison                                                                *
+ * -----                                                                                 *
+ * Last Modified: Wednesday, 3rd March 2021 10:53:40 am                                  *
+ * Modified By: Peter Harrison                                                           *
+ * -----                                                                                 *
+ * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
+ * -----                                                                                 *
+ * MIT License                                                                           *
+ *                                                                                       *
+ * Copyright (c) 2021 Peter harrison                                                     *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of       *
+ * this software and associated documentation files (the "Software"), to deal in         *
+ * the Software without restriction, including without limitation the rights to          *
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies         *
+ * of the Software, and to permit persons to whom the Software is furnished to do        *
+ * so, subject to the following conditions:                                              *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all        *
+ * copies or substantial portions of the Software.                                       *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR            *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,              *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE           *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,         *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE         *
+ * SOFTWARE.                                                                             *
+ */
 
 #include "settings.h"
 #include "EEPROM.h"
 #include <Arduino.h>
+#include <util/crc16.h>
 // TODO: read and write the setting in EEPROM
 
 // create arrays holding the details of each setting in flash
@@ -138,6 +151,14 @@ void load_settings_from_eeprom(bool verbose) {
     }
 }
 
+/***
+ * be sure the buffer has enough space
+ */
+int get_setting_name(int i, char *s) {
+    // Necessary casts and dereferencing,
+    strncpy_P(s, (char *)pgm_read_word(&(variableString[i])), 31);
+    return 0;
+}
 /***
  * Utility function to send details of a single settings variable over
  * the serial device.

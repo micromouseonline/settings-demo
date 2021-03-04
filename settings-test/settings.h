@@ -1,22 +1,38 @@
+/*
+ * File: settings.h                                                                      *
+ * Project: settings-test                                                                *
+ * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
+ * Author: Peter Harrison                                                                *
+ * -----                                                                                 *
+ * Last Modified: Wednesday, 3rd March 2021 10:53:23 am                                  *
+ * Modified By: Peter Harrison                                                           *
+ * -----                                                                                 *
+ * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
+ * -----                                                                                 *
+ * MIT License                                                                           *
+ *                                                                                       *
+ * Copyright (c) 2021 Peter harrison                                                     *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of       *
+ * this software and associated documentation files (the "Software"), to deal in         *
+ * the Software without restriction, including without limitation the rights to          *
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies         *
+ * of the Software, and to permit persons to whom the Software is furnished to do        *
+ * so, subject to the following conditions:                                              *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all        *
+ * copies or substantial portions of the Software.                                       *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR            *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,              *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE           *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,         *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE         *
+ * SOFTWARE.                                                                             *
+ */
+
 /***********************************************************************
- * Created by Peter Harrison on 2019-06-10.
- *
- * The MIT License (MIT)
- * Copyright (c) 2021 Peter Harrison
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
- * subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all copies or substantial
- * portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
- * TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
- * THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * Macros derived from
  * https://stackoverflow.com/questions/201593/is-there-a-simple-way-to-convert-c-enum-to-string/238157#238157
@@ -56,7 +72,7 @@
  *
  * NOTE: this means that any custom values in EEPROM will be lost.
  */
-const int SETTINGS_REVISION = 1005;
+const int SETTINGS_REVISION = 1006;
 
 /***
  * The address of the copy stored in EEPROM must be fixed. Although the size of
@@ -88,7 +104,7 @@ enum TypeName : uint8_t {
  * of the form
  *    ACTION( type, name, default)  \
  * where
- *    type is any valid C/C++ type
+ *    type is any valid C/C++ type - but make sure there is an entry in TypeName
  *    name is a legal C/C++ identifier
  *    default is the value stored in flash as the default
  *
@@ -99,10 +115,10 @@ enum TypeName : uint8_t {
  */
 #define SETTINGS_PARAMETERS(ACTION)                \
   ACTION(  int,         revision,    SETTINGS_REVISION)        \
-  ACTION(  float,       MaxSpeed,    123.45)     \
+  ACTION(  float,       MaxSpeed,    123.45678)     \
   ACTION(  float,       MaxAccel,     23.456)    \
   ACTION(  float,       MaxOmega,     34.567)    \
-  ACTION(  float,       MinOmega,     34.567)    \
+  ACTION(  float,       MinOmega,     45.678)    \
   ACTION(  uint32_t,    maxTime,     123456)     \
   ACTION(  int,         RunCount,    0)        \
   ACTION(  bool,        JapanRules,  true)       \
@@ -158,6 +174,8 @@ void load_settings_from_eeprom(bool verbose = false);
 
 // send all to the serial device. sets displayed decimals
 void dump_settings(const int dp = 2);
+
+int get_setting_name(int i, char *s);
 
 // send one setting to the serial device
 void print_setting(const int i, const int dp = 2);
