@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Wednesday, 3rd March 2021 10:53:40 am                                  *
+ * Last Modified: Thursday, 4th March 2021 12:57:14 pm                                   *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
@@ -245,4 +245,69 @@ int write_setting(const int i, const char *valueString) {
 int restore_default_settings() {
     memcpy_P(&settings, &defaults, sizeof(defaults));
     return 0;
+}
+
+/***
+ * A simple 16 bit hash function for strings (null terminated character arrays).
+ *
+ * This can be used if needed to create a lookup table for settings names
+ * if other search methods prove too slow. For this purpose, each settings
+ * identfier can be converted to a 16 bit hash vales and the resulting array
+ * stored in RAM.
+ *
+ * Note that setting names are stored in Flash memory where this code cannot
+ * normally see them. Instead, when building the hash table, use the
+ * get_setting_name() function to copy each name into a temporary buffer
+ * before calculating the hash.
+ *
+ * Note that the user will need to find a way to deal with collisions. That is,
+ * there will be more than one string that can generate a given hash. With more
+ * that 65,000 hash values, the risk should be low. In practice, it would be
+ * easier to test all the strings that are to be used and change any that cause
+ * collisions rather than add a way to deal with the collisions.
+ *
+ * When a setting is requested by name, the supplied name is also converted to a
+ * hash and the table can be searched for a corresponding value.
+ *
+ * If the hashes are stored in the same order as the settings then the index of
+ * the matching hash is also the index of the setting in the relevant tables.
+ *
+ * This method consumes 2 bytes of RAM for every setting entry and so it may not
+ * be worth the cost unless speed is very important.
+ *
+ * For a cost of an additional byte, the hash table could hold both the hash and
+ * the setting index. Then, if the hash table were sorted, a fast binary search
+ * could be used to locate the corresponding settings variable.
+ *
+ * It is entirely possible that an 8 bit hash is sufficient for small applications.
+ */
+
+uint16_t hash16(const char *string) {
+    // http://www.cse.yorku.ca/~oz/hash.html
+    uint16_t hash = 5381;
+    char c;
+
+    while ((c = *string++) != '\0') {
+        hash = (hash * 33) + c;
+    }
+    return hash;
+}
+
+/***
+ * A basic 8 bit CRC check that can be used to validate blocks of
+ * memory. These may be commands passed back and forth or the values
+ * stored in the settings objects.
+ *
+ * One use might be to compare the default values hard-coded into
+ * the firmware with those stored in EEPROM.
+ *
+ */
+uint8_t crc8(uint8_t *data, unsigned int size) {
+    uint8_t checksum = 0;
+    while (size--) {
+        checksum = (checksum << 1) | (checksum >> 7);
+        checksum += *data;
+        data++;
+    }
+    return checksum;
 }

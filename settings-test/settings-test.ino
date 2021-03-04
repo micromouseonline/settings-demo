@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 3:38:49 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Wednesday, 3rd March 2021 11:07:16 am                                  *
+ * Last Modified: Thursday, 4th March 2021 1:03:25 pm                                    *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Micromouseonline                                *
@@ -36,6 +36,7 @@
 #include "stopwatch.h"
 #include "system-commands.h"
 #include <Arduino.h>
+#include <util/crc16.h>
 
 char line_buffer[64];
 int index = 0;
@@ -46,6 +47,7 @@ void prompt() {
     Serial.print('>');
     Serial.print(' ');
 }
+
 void process_incoming_serial() {
     while (Serial.available()) {
         char c = Serial.read();
@@ -90,10 +92,8 @@ void show_some_samples() {
     write_setting(3, 98);
     write_setting(7, false);
 
-    settings.MaxAccel = 100;
-    Serial.println(settings.RunCount);
-    settings.RunCount = 100;
-    Serial.println(settings.RunCount);
+    settings.int_var = 100;
+    Serial.println(settings.int_var);
 
     Serial.println();
     Serial.println(F("Modified settings:"));
@@ -104,7 +104,7 @@ void show_some_samples() {
     restore_default_settings();
     dump_settings(4);
 
-    settings.MaxAccel = 999999;
+    settings.float_var = 999999;
     Serial.println();
     Serial.println(F("Loaded settings:"));
     load_settings_from_eeprom();
@@ -124,6 +124,7 @@ void initilise_settings() {
 void setup() {
     Serial.begin(115200);
     initilise_settings();
+    Serial.println(hash16("Benny and the jets"));
     prompt();
 }
 

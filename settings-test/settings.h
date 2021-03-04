@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Wednesday, 3rd March 2021 10:53:23 am                                  *
+ * Last Modified: Thursday, 4th March 2021 1:08:22 pm                                    *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
@@ -72,7 +72,7 @@
  *
  * NOTE: this means that any custom values in EEPROM will be lost.
  */
-const int SETTINGS_REVISION = 1006;
+const int SETTINGS_REVISION = 1007;
 
 /***
  * The address of the copy stored in EEPROM must be fixed. Although the size of
@@ -90,12 +90,12 @@ const int SETTING_MAX_SIZE = 64;
  * form T_xxxx where xxxx is any legal type name in C/C++
  */
 enum TypeName : uint8_t {
-    T_char,
     T_bool,
+    T_char,
+    T_int,
     T_uint16_t,
     T_uint32_t,
     T_float,
-    T_int,
 };
 
 // clang-format off
@@ -115,14 +115,12 @@ enum TypeName : uint8_t {
  */
 #define SETTINGS_PARAMETERS(ACTION)                \
   ACTION(  int,         revision,    SETTINGS_REVISION)        \
-  ACTION(  float,       MaxSpeed,    123.45678)     \
-  ACTION(  float,       MaxAccel,     23.456)    \
-  ACTION(  float,       MaxOmega,     34.567)    \
-  ACTION(  float,       MinOmega,     45.678)    \
-  ACTION(  uint32_t,    maxTime,     123456)     \
-  ACTION(  int,         RunCount,    0)        \
-  ACTION(  bool,        JapanRules,  true)       \
-  ACTION(  uint16_t,    flags,       0)         \
+  ACTION(  bool,        bool_var,     true)       \
+  ACTION(  char,        char_var,     'y')    \
+  ACTION(  int,         int_var,      23)    \
+  ACTION(  uint16_t,    uint16_var,   4567)    \
+  ACTION(  uint32_t,    uint32_vare,  123456789)     \
+  ACTION(  float,       float_var,    123.45678)     \
 \
 
 /***
@@ -167,32 +165,34 @@ extern const Settings defaults; // The coded-in defaults in flash
 extern void *const variablePointers[] PROGMEM;
 extern const TypeName variableType[] PROGMEM;
 const int get_settings_count();
+
+uint16_t hash16(const char *string);
+uint8_t crc8(uint8_t *data, unsigned int size);
 int restore_default_settings();
 
 void save_settings_to_eeprom();
 void load_settings_from_eeprom(bool verbose = false);
 
 // send all to the serial device. sets displayed decimals
-void dump_settings(const int dp = 2);
+void dump_settings(const int dp = 4);
 
 int get_setting_name(int i, char *s);
 
 // send one setting to the serial device
-void print_setting(const int i, const int dp = 2);
+void print_setting(const int i, const int dp = 4);
 
 // write a setting by index number
 int write_setting(const int i, const char *valueString);
 /***
  * The templated version executes much faster because there are
- * no calls to the ascci_to_xxx converters.
+ * no calls to the ascii_to_xxx converters.
  *
  * If the string converting version is never called, you will
  * save about 1k of flash. Unless you use atof() or atoi() elsewhere.
  *
- *
  */
 
-// TODO: when the converters are moved into this file, the strng version should use them
+// TODO: when the converters are moved into this file, the string version should use them
 template <class T>
 int write_setting(const int i, const T value) {
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
