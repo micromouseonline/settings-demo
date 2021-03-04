@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 12:33:55 pm                                     *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Wednesday, 3rd March 2021 10:55:39 am                                  *
+ * Last Modified: Thursday, 4th March 2021 2:25:14 pm                                    *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter Harrison, Micromouseonline                                *
@@ -168,6 +168,12 @@ int execute_settings_command(char *line) {
                 // could be used by host to populate its data structures
                 // list the settings names and types?
                 // or send them as a C declaration?
+                // or a JSON object ...
+
+                for (int i = 0; i < get_settings_count(); i++) {
+                    print_setting_details(i);
+                    Serial.println(';');
+                }
                 return T_OK;
                 break;
         }
@@ -188,6 +194,7 @@ int execute_settings_command(char *line) {
     // There is a parameter index, now see if this is an assignment
     if (line[pos++] != '=') {
         print_setting(index, 3); // no, just report the value
+        Serial.println();
         return T_OK;
     }
 

@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Thursday, 4th March 2021 12:57:14 pm                                   *
+ * Last Modified: Thursday, 4th March 2021 2:25:14 pm                                    *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
@@ -125,7 +125,11 @@ const int get_settings_count() {
 void dump_settings(const int dp) {
     Serial.println();
     for (int i = 0; i < get_settings_count(); i++) {
-        print_setting(i, dp);
+        Serial.print('$');
+        Serial.print(i);
+        Serial.print('=');
+        print_setting_value(i, dp);
+        Serial.println();
     }
 }
 
@@ -159,20 +163,36 @@ int get_setting_name(int i, char *s) {
     strncpy_P(s, (char *)pgm_read_word(&(variableString[i])), 31);
     return 0;
 }
+void print_setting(int i, const int dp) {
+    if (i >= get_settings_count()) {
+        return;
+    }
+    Serial.print('$');
+    Serial.print(i);
+    Serial.print('=');
+    print_setting_value(i, dp);
+}
+
+void print_setting_details(const int i, const int dp) {
+    print_setting_type(i);
+    Serial.print(' ');
+    print_setting_name(i);
+    Serial.print(' ');
+    Serial.print('=');
+    Serial.print(' ');
+    print_setting_value(i, dp);
+}
+
 /***
  * Utility function to send details of a single settings variable over
  * the serial device.
  *
  * The variable is identified by its index, i.
  */
-void print_setting(const int i, const int dp) {
+void print_setting_value(const int i, const int dp) {
     if (i >= get_settings_count()) {
         return;
     }
-    Serial.print('$');
-    Serial.print(i);
-    // Serial.print(' ');
-    Serial.print('=');
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i)) {
         case T_float:
@@ -180,9 +200,6 @@ void print_setting(const int i, const int dp) {
             break;
         case T_bool:
             Serial.print((*reinterpret_cast<bool *>(ptr)) ? 1 : 0);
-            break;
-        case T_char:
-            Serial.print(*reinterpret_cast<char *>(ptr));
             break;
         case T_uint32_t:
             Serial.print(*reinterpret_cast<uint32_t *>(ptr));
@@ -196,12 +213,38 @@ void print_setting(const int i, const int dp) {
         default:
             Serial.println(F(" unknown type"));
     }
-    Serial.print(' ');
-    // char buffer[32];
-    // Serial.print('#');
-    // strncpy_P(buffer, (char *)pgm_read_word(&(variableString[i])), 31); // Necessary casts and dereferencing,
-    // Serial.print(buffer);
-    Serial.println();
+}
+
+void print_setting_name(int i) {
+    if (i >= get_settings_count()) {
+        return;
+    }
+    char buffer[32];
+    strncpy_P(buffer, (char *)pgm_read_word(&(variableString[i])), 31); // Necessary casts and dereferencing,
+    Serial.print(buffer);
+}
+
+void print_setting_type(const int i) {
+    if (i >= get_settings_count()) {
+        return;
+    }
+    switch (pgm_read_byte_near(variableType + i)) {
+        case T_float:
+            Serial.print(F("float"));
+            break;
+        case T_bool:
+            Serial.print(F("bool"));
+            break;
+        case T_uint32_t:
+            Serial.print(F("uint32_t"));
+            break;
+        case T_uint16_t:
+            Serial.print(F("uint16_t"));
+            break;
+        case T_int: // fall through for ints
+        default:
+            Serial.print(F("int"));
+    }
 }
 
 /***
@@ -222,9 +265,6 @@ int write_setting(const int i, const char *valueString) {
             break;
         case T_bool:
             *reinterpret_cast<bool *>(ptr) = atoi(valueString) ? true : false;
-            break;
-        case T_char:
-            *reinterpret_cast<char *>(ptr) = valueString[0];
             break;
         case T_uint32_t:
             *reinterpret_cast<uint32_t *>(ptr) = atoi(valueString);

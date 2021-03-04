@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 3:38:49 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Thursday, 4th March 2021 1:03:25 pm                                    *
+ * Last Modified: Thursday, 4th March 2021 2:23:36 pm                                    *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Micromouseonline                                *
@@ -89,11 +89,9 @@ void show_some_samples() {
     Serial.println(F("Default settings:"));
     dump_settings();
 
-    write_setting(3, 98);
-    write_setting(7, false);
-
-    settings.int_var = 100;
-    Serial.println(settings.int_var);
+    settings.velocity = 99.999;
+    Serial.println(F("Velocity: "));
+    Serial.println(settings.velocity);
 
     Serial.println();
     Serial.println(F("Modified settings:"));
@@ -104,8 +102,6 @@ void show_some_samples() {
     restore_default_settings();
     dump_settings(4);
 
-    settings.float_var = 999999;
-    Serial.println();
     Serial.println(F("Loaded settings:"));
     load_settings_from_eeprom();
     dump_settings();
@@ -121,6 +117,7 @@ void initilise_settings() {
     Serial.println();
     load_settings_from_eeprom(true);
 }
+
 void setup() {
     Serial.begin(115200);
     initilise_settings();

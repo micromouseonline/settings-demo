@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Thursday, 4th March 2021 1:08:22 pm                                    *
+ * Last Modified: Thursday, 4th March 2021 2:35:52 pm                                    *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
@@ -51,7 +51,7 @@
 #include <Arduino.h>
 
 /***
- * The revision number can be used to indicate a change to the settins
+ * The revision number can be used to indicate a change to the settings
  * structure. For example a type change for a variable or the addition or
  * deletion of a variable.
  *
@@ -66,13 +66,13 @@
  * Another reason for a change in the revision might be for a codebase that
  * runs on a similar but different target.
  *
- * The only safe approach when that happens is to resto overwrite any settings
+ * The only safe approach when that happens is to overwrite any settings
  * stored in EEPROM with the compiled defaults and load the working settings
  * with those values.
  *
  * NOTE: this means that any custom values in EEPROM will be lost.
  */
-const int SETTINGS_REVISION = 1007;
+const int SETTINGS_REVISION = 1009;
 
 /***
  * The address of the copy stored in EEPROM must be fixed. Although the size of
@@ -91,7 +91,6 @@ const int SETTING_MAX_SIZE = 64;
  */
 enum TypeName : uint8_t {
     T_bool,
-    T_char,
     T_int,
     T_uint16_t,
     T_uint32_t,
@@ -111,16 +110,17 @@ enum TypeName : uint8_t {
  * This list will be used to generate structures and populate them autumatically
  * at build time.
  *
- * NOTE: if the structure is changes, update SETTINGS_REVISION
+ * NOTE: if the structure is changed, update SETTINGS_REVISION
+ *
+ * This is a multi-line macro. do not leave off the trailing backslash
  */
-#define SETTINGS_PARAMETERS(ACTION)                \
-  ACTION(  int,         revision,    SETTINGS_REVISION)        \
-  ACTION(  bool,        bool_var,     true)       \
-  ACTION(  char,        char_var,     'y')    \
-  ACTION(  int,         int_var,      23)    \
-  ACTION(  uint16_t,    uint16_var,   4567)    \
-  ACTION(  uint32_t,    uint32_vare,  123456789)     \
-  ACTION(  float,       float_var,    123.45678)     \
+#define SETTINGS_PARAMETERS(ACTION)                      \
+  ACTION(  int,         revision,    SETTINGS_REVISION)  \
+  ACTION(  bool,        is_ready,    true)               \
+  ACTION(  int,         batch_no,    23)                 \
+  ACTION(  uint16_t,    quantity,    4567)               \
+  ACTION(  uint32_t,    identity,    123456789)          \
+  ACTION(  float,       velocity,    123.45678)          \
 \
 
 /***
@@ -140,7 +140,6 @@ enum TypeName : uint8_t {
 
 // clang-format on
 
-//
 /***
  * define the structure that holds the settings
  *
@@ -157,31 +156,37 @@ struct Settings {
     SETTINGS_PARAMETERS(MAKE_STRUCT)
 };
 
-/***
- * Now declare the two global instances of the settings
- */
+// Now declare the  global instances of the settings data
 extern Settings settings;       // the global working copy in RAM
 extern const Settings defaults; // The coded-in defaults in flash
+// and the supprting structures
 extern void *const variablePointers[] PROGMEM;
 extern const TypeName variableType[] PROGMEM;
+
 const int get_settings_count();
 
+// Some support utilities
 uint16_t hash16(const char *string);
 uint8_t crc8(uint8_t *data, unsigned int size);
-int restore_default_settings();
 
+int get_setting_name(int i, char *s);
+void print_setting_name(int i);
+void print_setting_type(const int i);
+void print_setting_value(const int i, const int dp = 4);
+void print_setting_details(const int i, const int dp = 4);
+
+// reading and writing EEPROM settings values and defaults
+int restore_default_settings();
 void save_settings_to_eeprom();
 void load_settings_from_eeprom(bool verbose = false);
+
+// send one setting to the serial device in the form '$n=xxx'
+void print_setting(const int i, const int dp = 4);
 
 // send all to the serial device. sets displayed decimals
 void dump_settings(const int dp = 4);
 
-int get_setting_name(int i, char *s);
-
-// send one setting to the serial device
-void print_setting(const int i, const int dp = 4);
-
-// write a setting by index number
+// write a value to a setting by index number
 int write_setting(const int i, const char *valueString);
 /***
  * The templated version executes much faster because there are
@@ -191,8 +196,6 @@ int write_setting(const int i, const char *valueString);
  * save about 1k of flash. Unless you use atof() or atoi() elsewhere.
  *
  */
-
-// TODO: when the converters are moved into this file, the string version should use them
 template <class T>
 int write_setting(const int i, const T value) {
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
@@ -202,9 +205,6 @@ int write_setting(const int i, const T value) {
             break;
         case T_bool:
             *reinterpret_cast<bool *>(ptr) = value;
-            break;
-        case T_char:
-            *reinterpret_cast<char *>(ptr) = value;
             break;
         case T_uint32_t:
             *reinterpret_cast<uint32_t *>(ptr) = value;
